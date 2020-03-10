@@ -26,21 +26,24 @@ public class Connection {
 
     public void readMessage(SocketChannel channel) throws IOException {
         int bytesRead = channel.read(inputBuffer);
-        while (inMessage.readMessage(bytesRead, !session.isActive())) {
-            processInMessage();
-            if (inputBuffer.remaining() > 0) {
-                inputBuffer.compact();
-            } else {
-                break;
+        try {
+            while (inMessage.readMessage(bytesRead, !session.isActive())) {
+                processInMessage();
+                if (inputBuffer.remaining() > 0) {
+                    inputBuffer.compact();
+                } else {
+                    break;
+                }
             }
+            if (inputBuffer.remaining() > 0) {
+                inputBuffer.position(inputBuffer.limit());
+                inputBuffer.limit(inputBuffer.capacity());
+            } else {
+                inputBuffer.clear();
+            }
+        } catch (FixParseException e) {
+            //TODO
         }
-        if (inputBuffer.remaining() > 0) {
-            inputBuffer.position(inputBuffer.limit());
-            inputBuffer.limit(inputBuffer.capacity());
-        } else {
-            inputBuffer.clear();
-        }
-
 
     }
 
